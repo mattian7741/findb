@@ -1,0 +1,59 @@
+venmo:
+  header_row: 3
+  required_column:
+    - "ID"
+  ignore_hash:
+    - "hash_to_ignore"
+  column_types:
+    "Datetime": "DATETIME"
+    "Amount (total)": "NUMERIC"
+    "Amount (tip)": "NUMERIC"
+    "Amount (tax)": "NUMERIC"
+    "Amount (fee)": "NUMERIC"
+    "Tax Rate": "NUMERIC"
+    "Tax Exempt": "NUMERIC"
+    "Beginning Balance": "NUMERIC"
+    "Ending Balance": "NUMERIC"
+    "Statement Period Venmo Fees": "NUMERIC"
+    "Year to Date Venmo Fees": "NUMERIC"
+amexcc:
+  column_types:
+    Date: "DATETIME"
+    Amount: "NUMERIC"
+amexsv:
+  headers:
+    - "Date"
+    - "Type"
+    - "Amount"
+  column_types:
+    Date: "DATETIME"
+    Amount: "NUMERIC"
+paypal:
+  column_types:
+    Date: "DATETIME"
+    Time: "DATETIME"
+    Amount: "NUMERIC"
+    Balance: "NUMERIC"
+chasecc:
+  column_types:
+    "Transaction Date": "DATETIME"
+    "Post Date": "DATETIME"
+    Amount: "NUMERIC"
+citicc:
+  column_types:
+    Date: "DATETIME"
+    Debit: "NUMERIC"
+    Credit: "NUMERIC"
+psecucc:
+  column_types:
+    Date: "DATETIME"
+    Principal: "NUMERIC"
+    Interest: "NUMERIC"
+    Fees: "NUMERIC"
+    Balance: "NUMERIC"
+psecuch:
+  column_types:
+    Date: "DATETIME"
+    Amount: "NUMERIC"
+    Balance: "NUMERIC"
+    "Check/Misc. ": "NUMERIC"
