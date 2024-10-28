@@ -1,4 +1,8 @@
 import sqlite3
+import logging
+
+# Set up logging configuration
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Database file path
 DB_FILE = 'financials.db'
@@ -25,45 +29,36 @@ def create_merchant_table_if_not_exists():
     conn.close()
 
 def get_unique_merchants_with_categories():
-    """Retrieve unique merchants with associated tx_categories from all_transactions view."""
+    """Fetch unique merchants with their categories from all_transactions view that are not already in the merchant table."""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     
-    query = """
-    SELECT tx_merchant, tx_category
-    FROM all_transactions
+    select_query = """
+        SELECT tx_merchant AS merchant_id, GROUP_CONCAT(DISTINCT tx_category) AS tx_categories
+        FROM all_transactions 
+        WHERE tx_merchant NOT IN (SELECT merchant_id FROM merchant)
+        GROUP BY tx_merchant
     """
     
-    cursor.execute(query)
-    rows = cursor.fetchall()
-    merchants_with_categories = {}
-
-    for merchant, category in rows:
-        if merchant not in merchants_with_categories:
-            merchants_with_categories[merchant] = set()
-        # Only add category if it's not None
-        if category is not None:
-            merchants_with_categories[merchant].add(category)
-
-    # Convert each merchant's category set to a comma-delimited string
-    for merchant in merchants_with_categories:
-        merchants_with_categories[merchant] = ",".join(sorted(merchants_with_categories[merchant]))
-
+    cursor.execute(select_query)
+    result = cursor.fetchall()
     conn.close()
-    
-    return merchants_with_categories
+    return {row[0]: row[1] for row in result}
+
 
 def insert_merchants(merchants_with_categories):
     """Insert unique merchants into the merchant table with aggregated tx_category values."""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    
+
     insert_query = """
-    INSERT OR REPLACE INTO merchant (merchant_id, tx_category) VALUES (?, ?)
+    INSERT OR IGNORE INTO merchant (merchant_id, tx_category) VALUES (?, ?)
     """
-    
+
     for merchant_id, tx_categories in merchants_with_categories.items():
         cursor.execute(insert_query, (merchant_id, tx_categories))
+        if cursor.rowcount > 0:  # rowcount will be 1 if the row was inserted
+            logging.info(f"Inserted merchant with ID {merchant_id} and categories {tx_categories}")
     
     conn.commit()
     conn.close()
