@@ -57,3 +57,28 @@ psecuch:
     Amount: "NUMERIC"
     Balance: "NUMERIC"
     "Check/Misc. ": "NUMERIC"
+psecudr:
+  column_types:
+    Date: "DATETIME"
+    Amount: "NUMERIC"
+    Balance: "NUMERIC"
+    "Check/Misc. ": "NUMERIC"
+psecuxd:
+  column_types:
+    Date: "DATETIME"
+    Amount: "NUMERIC"
+    Balance: "NUMERIC"
+    "Check/Misc. ": "NUMERIC"
+psecupe:
+  column_types:
+    Date: "DATETIME"
+    Amount: "NUMERIC"
+    Balance: "NUMERIC"
+    "Check/Misc. ": "NUMERIC"
+chasemo:
+  column_types:
+    Date: "DATETIME"
+    Amount: "NUMERIC"
+    Unapplied: "NUMERIC"
+    Balance: "NUMERIC"
+

@@ -16,27 +16,33 @@ SELECT
     substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
     'venmo' AS Account,                                                           -- Static account name
     date(Datetime, 'unixepoch', '-4 hours') AS tx_date,                           -- Convert to EDT format (UTC-4) for the date only
-    CASE
-        WHEN CAST(REPLACE([Amount (total)], '$', '') AS NUMERIC) < 0 THEN "To"
-        ELSE "From"
-    END AS tx_merchant,                                                           -- Conditional tx_merchant based on amount sign
+    IFNULL(
+        CASE
+            WHEN CAST(REPLACE([Amount (total)], '$', '') AS NUMERIC) < 0 THEN "To"
+            WHEN CAST(REPLACE([Amount (total)], '$', '') AS NUMERIC) >= 0 THEN "From"
+            ELSE NULL
+        END,
+        "Destination"
+    ) AS tx_merchant,                                                             -- Conditional tx_merchant with default to "Funding Source" if NULL
     CAST(REPLACE([Amount (total)], '$', '') AS NUMERIC) AS tx_amount,             -- Remove $ and cast to numeric for total amount
     Type AS tx_category,                                                          -- Use Type as transaction category
     Note AS tx_note                                                               -- Include Note column as tx_note
 FROM venmo
 WHERE Tags != 'duplicate' OR Tags IS NULL;
 
+
 CREATE VIEW paypal_view AS
 SELECT
     substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
     'paypal' AS Account,                                                          -- Static account name
     date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
-    Name AS tx_merchant,                                                          -- Use Name as merchant
+    IFNULL(Name, Type) AS tx_merchant,                                            -- Use Name as merchant, default to Type if Name is NULL
     CAST(REPLACE(Amount, '$', '') AS NUMERIC) AS tx_amount,                       -- Remove $ and cast to numeric for amount
     Type AS tx_category,                                                          -- Use Type as transaction category
     NULL AS tx_note                                                               -- Set tx_note to NULL
 FROM paypal
 WHERE Tags != 'duplicate' OR Tags IS NULL;
+
 
 
 CREATE VIEW psecuch_view AS

@@ -23,7 +23,7 @@ class DropzoneHandler(FileSystemEventHandler):
 
     def on_created(self, event):
         """Triggered when a new file is created in the dropzone."""
-        if event.is_directory or not event.src_path.endswith('.csv'):
+        if event.is_directory or not event.src_path.lower().endswith('.csv'):
             return  # Skip directories and non-CSV files
 
         account_folder = os.path.relpath(event.src_path, DROPZONE_PATH)
@@ -80,7 +80,7 @@ class DropzoneHandler(FileSystemEventHandler):
             if os.path.isdir(account_folder):
                 for file_name in os.listdir(account_folder):
                     file_path = os.path.join(account_folder, file_name)
-                    if file_name.endswith('.csv') and os.path.isfile(file_path):
+                    if file_name.lower().endswith('.csv') and os.path.isfile(file_path):
                         print(f"Found existing .csv file '{file_path}' for account '{account_name}'")
                         self.pending_files += 1
                         success = self.process_file(account_name, file_path)
@@ -91,10 +91,9 @@ class DropzoneHandler(FileSystemEventHandler):
     def is_dropzone_empty(self):
         """Check if there are any remaining .csv files in the dropzone directory."""
         for root, _, files in os.walk(DROPZONE_PATH):
-            if any(file.endswith('.csv') for file in files):
+            if any(file.lower().endswith('.csv') for file in files):
                 return False
         return True
-
 
     def run_merchant_scripts(self):
         """Run the merchant.py script, followed by the merchant_meta.py script to add metadata."""
@@ -110,7 +109,7 @@ class DropzoneHandler(FileSystemEventHandler):
             print(f"Error running merchant update script: {e.stderr}")
 
         # Only run merchant_meta.py if merchant.py ran successfully
-        if False: # merchant_success:
+        if False: #merchant_success:
             print("Running merchant metadata update script...")
             try:
                 # Stream output directly to avoid buffering issues
@@ -118,7 +117,6 @@ class DropzoneHandler(FileSystemEventHandler):
                 print("Merchant metadata update completed.")
             except subprocess.CalledProcessError as e:
                 print(f"Error running merchant metadata update script: {e.stderr}")
-
 
 def run_service():
     """Set up and run the dropzone folder monitoring service."""
