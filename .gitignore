@@ -134,6 +134,9 @@ logs/
 *.sublime-workspace
 *.sublime-project
 
+# Data Files
+*.dump
+
 # Custom Folders
 /completed/
 /dropzone/

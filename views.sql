@@ -1,21 +1,23 @@
+
+DROP VIEW amexsv_view;
 CREATE VIEW amexsv_view AS
 SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
-    'amexsv' AS Account,                                                          -- Static account name
-    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
-    Type AS tx_merchant,                                                          -- Use Type as merchant
-    Amount AS tx_amount,                                                          -- Use Amount as transaction amount
-    NULL AS tx_category,                                                          -- Set tx_category to NULL
-    NULL AS tx_note                                                               -- Set tx_note to NULL
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'amexsv' AS Account,
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,
+    Type AS tx_merchant,
+    Amount AS tx_amount,
+    NULL AS tx_category,
+    NULL AS tx_note
 FROM amexsv
 WHERE Tags != 'duplicate' OR Tags IS NULL;
 
-
+DROP VIEW venmo_view;
 CREATE VIEW venmo_view AS
 SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
-    'venmo' AS Account,                                                           -- Static account name
-    date(Datetime, 'unixepoch', '-4 hours') AS tx_date,                           -- Convert to EDT format (UTC-4) for the date only
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'venmo' AS Account,
+    date(Datetime, 'unixepoch', '-4 hours') AS tx_date,
     IFNULL(
         CASE
             WHEN CAST(REPLACE([Amount (total)], '$', '') AS NUMERIC) < 0 THEN "To"
@@ -23,83 +25,174 @@ SELECT
             ELSE NULL
         END,
         "Destination"
-    ) AS tx_merchant,                                                             -- Conditional tx_merchant with default to "Funding Source" if NULL
-    CAST(REPLACE([Amount (total)], '$', '') AS NUMERIC) AS tx_amount,             -- Remove $ and cast to numeric for total amount
-    Type AS tx_category,                                                          -- Use Type as transaction category
-    Note AS tx_note                                                               -- Include Note column as tx_note
+    ) AS tx_merchant, 
+    CAST(REPLACE([Amount (total)], '$', '') AS NUMERIC) AS tx_amount,
+    Type AS tx_category,
+    Note AS tx_note
 FROM venmo
 WHERE Tags != 'duplicate' OR Tags IS NULL;
 
-
+DROP VIEW paypal_view;
 CREATE VIEW paypal_view AS
 SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
-    'paypal' AS Account,                                                          -- Static account name
-    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
-    IFNULL(Name, Type) AS tx_merchant,                                            -- Use Name as merchant, default to Type if Name is NULL
-    CAST(REPLACE(Amount, '$', '') AS NUMERIC) AS tx_amount,                       -- Remove $ and cast to numeric for amount
-    Type AS tx_category,                                                          -- Use Type as transaction category
-    NULL AS tx_note                                                               -- Set tx_note to NULL
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'paypal' AS Account,
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,
+    IFNULL(Name, Type) AS tx_merchant,
+    CAST(REPLACE(Amount, '$', '') AS NUMERIC) AS tx_amount,
+    Type AS tx_category,
+    NULL AS tx_note
 FROM paypal
 WHERE Tags != 'duplicate' OR Tags IS NULL;
 
 
-
+DROP VIEW psecuch_view;
 CREATE VIEW psecuch_view AS
 SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
-    'psecuch' AS Account,                                                         -- Static account name
-    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
-    "Transaction Description" AS tx_merchant,                                     -- Use Transaction Description as merchant
-    Amount AS tx_amount,                                                          -- Use Amount as transaction amount
-    Category AS tx_category,                                                      -- Use Category as transaction category
-    Note AS tx_note                                                               -- Use Note column as tx_note
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'psecuch' AS Account,
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,
+    "Transaction Description" AS tx_merchant,
+    Amount AS tx_amount,
+    Category AS tx_category,
+    Note AS tx_note
 FROM psecuch
 WHERE Tags != 'duplicate' OR Tags IS NULL;
 
-
+DROP VIEW psecucc_view;
 CREATE VIEW psecucc_view AS
 SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
-    'psecucc' AS Account,                                                         -- Static account name
-    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
-    "Transaction Description" AS tx_merchant,                                     -- Use Transaction Description as merchant
-    -(Principal + Interest + Fees) AS tx_amount,                                  -- Invert tx_amount by multiplying by -1
-    Category AS tx_category,                                                      -- Use Category as transaction category
-    Note AS tx_note                                                               -- Use Note column as tx_note
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'psecucc' AS Account,
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,
+    "Transaction Description" AS tx_merchant,
+    -(Principal + Interest + Fees) AS tx_amount,
+    Category AS tx_category,
+    Note AS tx_note
 FROM psecucc
 WHERE Tags != 'duplicate' OR Tags IS NULL;
 
-
+DROP VIEW chasecc_view;
 CREATE VIEW chasecc_view AS
 SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
-    'chasecc' AS Account,                                                         -- Static account name
-    date("Transaction Date", 'unixepoch', '-4 hours') AS tx_date,                 -- Convert to EDT format (UTC-4) for the date only
-    Description AS tx_merchant,                                                   -- Use Description as merchant
-    Amount AS tx_amount,                                                          -- Use Amount as transaction amount
-    Category AS tx_category,                                                      -- Use Category as transaction category
-    Memo AS tx_note                                                               -- Use Memo column as tx_note
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'chasecc' AS Account,
+    date("Transaction Date", 'unixepoch', '-4 hours') AS tx_date,
+    Description AS tx_merchant,
+    Amount AS tx_amount,
+    Category AS tx_category,
+    Memo AS tx_note
 FROM chasecc
 WHERE Tags != 'duplicate' OR Tags IS NULL;
 
-
+DROP VIEW citicc_view;
 CREATE VIEW citicc_view AS
 SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
-    'citicc' AS Account,                                                          -- Static account name
-    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
-    Description AS tx_merchant,                                                   -- Use Description as merchant
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'citicc' AS Account,
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,
+    Description AS tx_merchant,
     CASE
-        WHEN Debit != 0 THEN -Debit                                               -- Use Debit as a negative amount
-        ELSE -Credit                                                              -- Use Credit as a positive amount
-    END AS tx_amount,                                                             -- Conditional tx_amount based on Debit or Credit
-    NULL AS tx_category,                                                          -- Set tx_category to NULL
-    NULL AS tx_note                                                               -- Set tx_note to NULL
+        WHEN Debit != 0 THEN -Debit
+        ELSE -Credit
+    END AS tx_amount,
+    NULL AS tx_category,
+    NULL AS tx_note
 FROM citicc
 WHERE Tags != 'duplicate' OR Tags IS NULL;
 
+DROP VIEW amexcc_view;
+CREATE VIEW amexcc_view AS
+SELECT
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'amexcc' AS Account,
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,
+    Description AS tx_merchant,
+    -Amount AS tx_amount,
+    Category AS tx_category,
+    "Extended Details" AS tx_note
+FROM amexcc
+WHERE Tags != 'duplicate' OR Tags IS NULL;
 
+DROP VIEW psecupe_view;
+CREATE VIEW psecupe_view AS
+SELECT
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'psecuch' AS Account,
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,
+    "Transaction Description" AS tx_merchant,
+    Amount AS tx_amount,
+    Category AS tx_category,
+    Note AS tx_note
+FROM psecupe
+WHERE Tags != 'duplicate' OR Tags IS NULL;
+
+DROP VIEW psecuxd_view;
+CREATE VIEW psecuxd_view AS
+SELECT
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'psecuxd' AS Account,
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,
+    "Transaction Description" AS tx_merchant,
+    Amount AS tx_amount,
+    Category AS tx_category,
+    Note AS tx_note
+FROM psecuxd
+WHERE Tags != 'duplicate' OR Tags IS NULL;
+
+DROP VIEW psecudr_view;
+CREATE VIEW psecudr_view AS
+SELECT
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'psecudr' AS Account,
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,
+    "Transaction Description" AS tx_merchant,
+    Amount AS tx_amount,
+    Category AS tx_category,
+    Note AS tx_note
+FROM psecudr
+WHERE Tags != 'duplicate' OR Tags IS NULL;
+DROP VIEW chasemo_view;
+CREATE VIEW chasemo_view AS
+SELECT
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'chasemo' AS Account,
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,
+    Description AS tx_merchant,
+    Amount AS tx_amount,
+    NULL AS tx_category,
+    NULL AS tx_note
+FROM chasemo
+WHERE Tags != 'duplicate' OR Tags IS NULL;
+
+DROP VIEW IF EXISTS mint_view;
+
+CREATE VIEW mint_view AS
+SELECT
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
+    "Account Name" AS Account,                                                    -- Use "Account Name" from mint as Account
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
+    "Original Description" AS tx_merchant,                                        -- Use "Original Description" as merchant
+    CASE
+        WHEN "Transaction Type" = "debit" THEN -Amount                            -- Negate Amount for debit transactions
+        ELSE Amount                                                               -- Use Amount directly for credit transactions
+    END AS tx_amount,                                                             -- Transaction amount based on type
+    Category AS tx_category,                                                      -- Use Category as transaction category
+    TRIM(
+        CASE WHEN Description IS NOT NULL AND Description != '' THEN Description ELSE '' END ||
+        CASE WHEN Labels IS NOT NULL AND Labels != '' THEN 
+            CASE WHEN Description IS NOT NULL AND Description != '' THEN ', ' ELSE '' END || Labels 
+        ELSE '' END ||
+        CASE WHEN Notes IS NOT NULL AND Notes != '' THEN 
+            CASE WHEN (Description IS NOT NULL AND Description != '') OR (Labels IS NOT NULL AND Labels != '') THEN ', ' ELSE '' END || Notes 
+        ELSE '' END
+    ) AS tx_note                                                                  -- Concatenate Description, Labels, Notes for tx_note
+FROM mint
+WHERE Tags != 'duplicate' OR Tags IS NULL;
+
+
+
+DROP VIEW all_transactions;
 CREATE VIEW all_transactions AS
 SELECT 
     a.unique_hash,
@@ -125,59 +218,16 @@ FROM (
     SELECT * FROM chasecc_view
     UNION ALL
     SELECT * FROM citicc_view
+    UNION ALL
+    SELECT * FROM chasemo_view
+    UNION ALL
+    SELECT * FROM psecupe_view
+    UNION ALL
+    SELECT * FROM psecuxd_view
+    UNION ALL
+    SELECT * FROM psecudr_view
+    UNION ALL
+    SELECT * FROM mint_view
 ) a
 LEFT JOIN merchant m ON a.tx_merchant = m.merchant_id
 ORDER BY a.tx_date;
-
-
-CREATE VIEW amexcc_view AS
-SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
-    'amexcc' AS Account,                                                          -- Static account name
-    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
-    Description AS tx_merchant,                                                   -- Use Description as merchant
-    -Amount AS tx_amount,                                                         -- Invert Amount by multiplying by -1
-    Category AS tx_category,                                                      -- Use Category as transaction category
-    "Extended Details" AS tx_note                                                 -- Use Extended Details as tx_note
-FROM amexcc
-WHERE Tags != 'duplicate' OR Tags IS NULL;
-
-
-CREATE VIEW psecupe_view AS
-SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
-    'psecupe' AS Account,                                                         -- Static account name
-    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
-    "Transaction Description" AS tx_merchant,                                     -- Use Transaction Description as merchant
-    Amount AS tx_amount,                                                          -- Use Amount as transaction amount
-    Category AS tx_category,                                                      -- Use Category as transaction category
-    Note AS tx_note                                                               -- Use Note column as tx_note
-FROM psecupe
-WHERE Tags != 'duplicate' OR Tags IS NULL;
-
-
-CREATE VIEW psecuxd_view AS
-SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
-    'psecuxd' AS Account,                                                         -- Static account name
-    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
-    "Transaction Description" AS tx_merchant,                                     -- Use Transaction Description as merchant
-    Amount AS tx_amount,                                                          -- Use Amount as transaction amount
-    Category AS tx_category,                                                      -- Use Category as transaction category
-    Note AS tx_note                                                               -- Use Note column as tx_note
-FROM psecuxd
-WHERE Tags != 'duplicate' OR Tags IS NULL;
-
-
-CREATE VIEW psecudr_view AS
-SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
-    'psecudr' AS Account,                                                         -- Static account name
-    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
-    "Transaction Description" AS tx_merchant,                                     -- Use Transaction Description as merchant
-    Amount AS tx_amount,                                                          -- Use Amount as transaction amount
-    Category AS tx_category,                                                      -- Use Category as transaction category
-    Note AS tx_note                                                               -- Use Note column as tx_note
-FROM psecudr
-WHERE Tags != 'duplicate' OR Tags IS NULL;
-

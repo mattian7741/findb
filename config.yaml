@@ -81,4 +81,9 @@ chasemo:
     Amount: "NUMERIC"
     Unapplied: "NUMERIC"
     Balance: "NUMERIC"
+mint:
+  column_types:
+    Date: "DATETIME"
+    Amount: "NUMERIC"
+
 
