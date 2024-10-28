@@ -141,3 +141,43 @@ SELECT
     "Extended Details" AS tx_note                                                 -- Use Extended Details as tx_note
 FROM amexcc
 WHERE Tags != 'duplicate' OR Tags IS NULL;
+
+
+CREATE VIEW psecupe_view AS
+SELECT
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
+    'psecupe' AS Account,                                                         -- Static account name
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
+    "Transaction Description" AS tx_merchant,                                     -- Use Transaction Description as merchant
+    Amount AS tx_amount,                                                          -- Use Amount as transaction amount
+    Category AS tx_category,                                                      -- Use Category as transaction category
+    Note AS tx_note                                                               -- Use Note column as tx_note
+FROM psecupe
+WHERE Tags != 'duplicate' OR Tags IS NULL;
+
+
+CREATE VIEW psecuxd_view AS
+SELECT
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
+    'psecuxd' AS Account,                                                         -- Static account name
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
+    "Transaction Description" AS tx_merchant,                                     -- Use Transaction Description as merchant
+    Amount AS tx_amount,                                                          -- Use Amount as transaction amount
+    Category AS tx_category,                                                      -- Use Category as transaction category
+    Note AS tx_note                                                               -- Use Note column as tx_note
+FROM psecuxd
+WHERE Tags != 'duplicate' OR Tags IS NULL;
+
+
+CREATE VIEW psecudr_view AS
+SELECT
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,  -- Shortened hash format
+    'psecudr' AS Account,                                                         -- Static account name
+    date(Date, 'unixepoch', '-4 hours') AS tx_date,                               -- Convert to EDT format (UTC-4) for the date only
+    "Transaction Description" AS tx_merchant,                                     -- Use Transaction Description as merchant
+    Amount AS tx_amount,                                                          -- Use Amount as transaction amount
+    Category AS tx_category,                                                      -- Use Category as transaction category
+    Note AS tx_note                                                               -- Use Note column as tx_note
+FROM psecudr
+WHERE Tags != 'duplicate' OR Tags IS NULL;
+
