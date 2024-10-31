@@ -20,6 +20,12 @@ amexcc:
   column_types:
     Date: "DATETIME"
     Amount: "NUMERIC"
+  hash_columns:
+    - Date
+    - Description
+    - Card Member
+    - "Account #"
+    - Amount
 amexsv:
   headers:
     - "Date"
