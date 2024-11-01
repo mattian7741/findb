@@ -96,3 +96,24 @@ mint:
     - "Original Description"
     - Amount
     - "Transaction Type"
+amazon_digital:
+  column_types:
+    FulfilledDate: "DATETIME"
+    OrderDate: "DATETIME"
+    OriginalQuantity: "NUMERIC"
+    OurPrice: "NUMERIC"
+    ListPriceAmount: "NUMERIC"
+    ListPriceTaxAmount: "NUMERIC"
+    QuantityOrdered: "NUMERIC"
+amazon:
+   column_types:
+    "Order Date": "DATETIME"
+    "Unit Price": "NUMERIC"
+    "Unit Price Tax": "NUMERIC"
+    "Shipping Charge": "NUMERIC"
+    "Total Discounts": "NUMERIC"
+    "Total Owed": "NUMERIC"
+    "Shipment Item Subtotal": "NUMERIC"
+    "Shipment Item Subtotal Tax": "NUMERIC"
+    Quantity: "NUMERIC"
+    "Ship Date": "DATETIME"

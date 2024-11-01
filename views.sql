@@ -187,6 +187,32 @@ FROM mint
 WHERE "Tags" != 'duplicate' OR "Tags" IS NULL;
 
 
+DROP VIEW IF EXISTS amazon_digital_view;
+CREATE VIEW amazon_digital_view AS
+SELECT
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'amazon_digital' AS Account,
+    OrderDate AS tx_date,
+    ProductName AS tx_merchant,
+    OurPrice AS tx_amount,
+    NULL AS tx_category, -- Assuming there's no direct category mapping available
+    "ASIN" || ', ' || "OrderId" || ', ' || COALESCE("GiftMessage", '') AS tx_note
+FROM amazon
+WHERE Tags != 'duplicate' OR Tags IS NULL;
+
+
+DROP VIEW IF EXISTS amazon_view;
+CREATE VIEW amazon_view AS
+SELECT
+    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    'amazon' AS Account,
+    "Order Date" AS tx_date,
+    "Product Name" AS tx_merchant,
+    "Total Owed" AS tx_amount,
+    "AMAZON" AS tx_category,  -- No direct category mapping available
+    "Purchase Order Number" || ', ' || "Order ID" AS tx_note  -- Combine Purchase Order Number and Order ID for notes
+FROM amazon
+WHERE Tags != 'duplicate' OR Tags IS NULL;
 
 
 DROP VIEW all_transactions;
@@ -228,6 +254,8 @@ FROM (
     SELECT * FROM psecudr_view
     UNION ALL
     SELECT * FROM mint_view
+    UNION ALL
+    SELECT * FROM amazon_view
 ) a
 LEFT JOIN merchant m ON a.tx_merchant = m.merchant_id
 ORDER BY a.tx_date;
