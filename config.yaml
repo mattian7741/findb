@@ -91,5 +91,8 @@ mint:
   column_types:
     Date: "DATETIME"
     Amount: "NUMERIC"
-
-
+  hash_columns:
+    - Date
+    - "Original Description"
+    - Amount
+    - "Transaction Type"

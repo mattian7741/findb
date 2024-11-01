@@ -36,7 +36,12 @@ def prepare_data(value, col_type):
     if col_type == "DATETIME":
         try:
             timestamp = pd.to_datetime(value, errors='raise')
-            return int(timestamp.timestamp()) if not pd.isnull(timestamp) else None
+            # Determine UTC offset based on month (rough guide for EDT and EST)
+            if timestamp.month in [4, 5, 6, 7, 8, 9, 10]:  # Typically EDT months
+                offset_hours = 4
+            else:
+                offset_hours = 5
+            return int((timestamp + pd.Timedelta(hours=offset_hours)).timestamp()) if not pd.isnull(timestamp) else None
         except:
             return None
     elif col_type == "NUMERIC":
@@ -142,6 +147,7 @@ def insert_csv_to_db(account_name, csv_file, config_file='config.yaml', db_file=
         missing_required = any(pd.isna(row[col]) or row[col] == "" for col in required_columns if col in df.columns)
         if missing_required:
             print(f"Skipping row with hash {unique_hash} due to missing required columns: {required_columns}")
+            continue
         # if unique_hash in ignore_hashes or any(row_values.get(col) in [None, ""] for col in required_columns):
         #      continue
 
