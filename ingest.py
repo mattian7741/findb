@@ -50,6 +50,9 @@ def prepare_data(value, col_type):
             return float(value)
         except ValueError:
             return None
+    elif isinstance(value, str):
+        # Trim and reduce whitespace for string values
+        return ' '.join(value.strip().split())  # Trim and replace multiple spaces with a single space
     return value  # For TEXT and other types
 
 def generate_unique_hash(row_values, table_name):

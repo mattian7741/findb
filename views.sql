@@ -101,18 +101,29 @@ SELECT
 FROM citicc
 WHERE Tags != 'duplicate' OR Tags IS NULL;
 
-DROP VIEW amexcc_view;
+DROP VIEW IF EXISTS amexcc_view;
 CREATE VIEW amexcc_view AS
 SELECT
-    substr(unique_hash, 1, 5) || '...' || substr(unique_hash, -4) AS unique_hash,
+    substr(a.unique_hash, 1, 5) || '...' || substr(a.unique_hash, -4) AS unique_hash,
     'amexcc' AS Account,
-    "Date" AS tx_date,
-    Description AS tx_merchant,
-    -Amount AS tx_amount,
-    Category AS tx_category,
-    "Extended Details" AS tx_note
-FROM amexcc
-WHERE Tags != 'duplicate' OR Tags IS NULL;
+    a."Date" AS tx_date,
+    a.Description AS tx_merchant,
+    -a.Amount AS tx_amount,
+    COALESCE(m.category, a.Category) AS tx_category,
+    CASE
+        -- Enrich the tx_note if the category is 'AMAZON'
+        WHEN COALESCE(m.category, a.Category) = 'AMAZON' AND amazon.tx_merchant is not null THEN
+            amazon.tx_merchant
+        ELSE
+            a."Extended Details"
+    END AS tx_note
+FROM amexcc a
+LEFT JOIN amazon_view amazon ON
+    date(a."Date", 'unixepoch') = date(amazon.tx_date, 'unixepoch') AND  -- Compare date part only
+    a.Amount = amazon.tx_amount
+LEFT JOIN merchant m ON a.Description = m.merchant_id  -- Adjusted join to include merchant table
+WHERE (a.Tags != 'duplicate' OR a.Tags IS NULL);
+
 
 DROP VIEW psecupe_view;
 CREATE VIEW psecupe_view AS
